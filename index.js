@@ -20,7 +20,7 @@ const data = {
   minNeighbors: 4,
   minWeightMagnitude: 3,
   seed: '',
-  numAddresses: undefined
+  numAddresses: undefined,
 };
 
 const iotajs = new IOTA({
