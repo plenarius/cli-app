@@ -7,6 +7,7 @@ const IOTA = require('iota.lib.js');
 const prompt = require('./lib/prompt');
 const setupCommands = require('./lib/commands/index');
 const vorpal = require('vorpal')();
+const constants = require('./lib/constants');
 
 const setDelimiter = prompt.setDelimiter;
 const setupPrompt = prompt.setupPrompt;
@@ -14,6 +15,10 @@ const setupPrompt = prompt.setupPrompt;
 const data = {
   accountData: undefined,
   currentNodeInfo: undefined,
+  host: 'http://localhost',
+  port: 14265,
+  user: '',
+  pass: '',
   depth: 9,
   maxNeighbors: 9,
   milestoneLag: 15,
@@ -23,10 +28,7 @@ const data = {
   numAddresses: undefined,
 };
 
-const iotajs = new IOTA({
-  host: 'http://localhost',
-  port: 14265
-});
+const iotajs = new IOTA({host: data.host, port: data.port});
 
 let refreshAccountDataTimer;
 const refreshAccountData = () => {
@@ -64,7 +66,8 @@ const refreshServerInfo = () => {
 
       // Also, see if we should store this node info in the config file
       config.get('nodes', []).then(nodes => {
-        const node = `${iotajs.host}:${iotajs.port}`.replace('http://', '');
+        const nodehost = `${iotajs.host}:${iotajs.port}`;
+        const node = nodehost.replace(/https?:\/\//i, '');
         if (nodes.indexOf(node) === -1) {
           nodes.push(node);
           nodes = nodes.sort();
