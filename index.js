@@ -58,63 +58,33 @@ const refreshAccountData = () => {
   }
 };
 
-const refreshServerInfo = () => {
-  iotajs.api.getNodeInfo((err, nodeInfo) => {
-    if (err) {
-      data.currentNodeInfo = undefined;
-    } else {
-      data.currentNodeInfo = nodeInfo;
+config.get('default_host', data.host).then(default_host => {
+  const parts = default_host.match(constants.uriRegex);
+  const protocol = parts[1] || defaultProtocol;
+  data.user = parts[2];
+  data.pass = parts[3];
+  data.host = parts[4];
+  config.get('default_port', data.port).then(default_port => {
+    data.port = default_port;
+    iotajs.changeNode({host: default_host, port: data.port});
 
-      // Also, see if we should store this node info in the config file
-      config.get('nodes', []).then(nodes => {
-        const nodehost = `${iotajs.host}:${iotajs.port}`;
-        const node = nodehost.replace(/https?:\/\//i, '');
-        if (nodes.indexOf(node) === -1) {
-          nodes.push(node);
-          nodes = nodes.sort();
-          config.set('nodes', nodes);
-        }
-      });
-    }
+    setupPrompt(data, iotajs, vorpal);
+    setupCommands(data, iotajs, refreshAccountData, vorpal);
 
-    setDelimiter();
-  });
-};
-
-config.get('default_host', '').then(default_host => {
-  if (default_host != '') {
-    const parts = default_host.match(constants.uriRegex);
-    const protocol = parts[1] || defaultProtocol;
-    data.user = parts[2];
-    data.pass = parts[3];
-    data.host = parts[4];
-    config.get('default_port', '').then(default_port => {
-      if (default_port != '') {
-        data.port = default_port;
-        iotajs.changeNode({host: default_host, port: default_port});
+    iotajs.api.getNodeInfo((err, nodeInfo) => {
+      if (err) {
+        data.currentNodeInfo = undefined;
       } else {
-        iotajs.changeNode({host: default_host,  port: 14265});
+        data.currentNodeInfo = nodeInfo;
       }
-     });
-   }
 
-  setupPrompt(data, iotajs, vorpal);
-  setupCommands(data, iotajs, refreshAccountData, refreshServerInfo, vorpal);
+      setDelimiter();
 
-  // Give the local connection a little time to connect, then get new data periodically.
-  // TODO make this more deterministic.  timeouts = ugly
-  setTimeout(refreshServerInfo, 100);
-  setInterval(refreshServerInfo, 15 * 1000);
-
-  const version = require('./package.json').version;
-  vorpal.log(chalk.green(`Running IOTA CLI v${version}\n`));
-
-  // Give the iotajs connection time to settle before processing command line params
-  // TODO make this more deterministic.  timeouts = ugly
-  setTimeout(() => {
-    vorpal.parse(process.argv);
-  }, 100);
-
-  vorpal.show();
+      const version = require('./package.json').version;
+      vorpal.log(chalk.green(`Running IOTA CLI v${version}\n`));
+      vorpal.parse(process.argv);
+      vorpal.show();
+    });
+   });
 });
 
