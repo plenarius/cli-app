@@ -19,11 +19,11 @@ const data = {
   port: 14265,
   user: '',
   pass: '',
-  depth: 9,
+  depth: 3,
   maxNeighbors: 9,
   milestoneLag: 15,
   minNeighbors: 4,
-  minWeightMagnitude: 3,
+  minWeightMagnitude: 14,
   seed: '',
   numAddresses: undefined,
   refreshAccountDataInterval: 2 * 60 * 1000
