@@ -70,21 +70,19 @@ config.get('default_host', data.host).then(default_host => {
 
     setupPrompt(data, iotajs, vorpal);
     setupCommands(data, iotajs, refreshAccountData, vorpal);
-
+    const version = require('./package.json').version;
+    vorpal.log(chalk.green(`Running IOTA CLI v${version}\n`));
     iotajs.api.getNodeInfo((err, nodeInfo) => {
       if (err) {
         data.currentNodeInfo = undefined;
+        vorpal.log(chalk.red(`Error connecting to ${default_host}:${default_port}.`));
+        vorpal.log(chalk.red(err));
       } else {
         data.currentNodeInfo = nodeInfo;
       }
-
       setDelimiter();
-
-      const version = require('./package.json').version;
-      vorpal.log(chalk.green(`Running IOTA CLI v${version}\n`));
       vorpal.parse(process.argv);
       vorpal.show();
     });
-   });
+  });
 });
-
