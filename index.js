@@ -23,8 +23,10 @@ const data = {
   maxNeighbors: 9,
   milestoneLag: 15,
   minNeighbors: 4,
-  minWeightMagnitude: 3,
-  seed: ''
+  minWeightMagnitude: 14,
+  seed: '',
+  numAddresses: undefined,
+  refreshAccountDataInterval: 2 * 60 * 1000
 };
 
 const iotajs = new IOTA({host: data.host, port: data.port});
@@ -36,7 +38,8 @@ const refreshAccountData = () => {
   }
 
   if (data.seed) {
-    iotajs.api.getAccountData(data.seed, (err, accountData) => {
+    var options = {'start': 0, 'end': data.numAddresses};
+    iotajs.api.getAccountData(data.seed,  options, (err, accountData) => {
       if (err) {
         // on fail, retry fast
         refreshAccountDataTimer = setTimeout(refreshAccountData, 10 * 1000);
@@ -50,7 +53,7 @@ const refreshAccountData = () => {
       setDelimiter();
 
       // on success, refresh slowly.
-      refreshAccountDataTimer = setTimeout(refreshAccountData, 2 * 60 * 1000);
+      refreshAccountDataTimer = setTimeout(refreshAccountData, data.refreshAccountDataInterval);
     });
   }
 };
