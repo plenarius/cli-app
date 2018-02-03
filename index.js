@@ -38,7 +38,7 @@ const refreshAccountData = () => {
   }
 
   if (data.seed) {
-    var options = {'start': 0, 'end': data.numAddresses};
+    let options = {'start': 0, 'end': data.numAddresses};
     iotajs.api.getAccountData(data.seed,  options, (err, accountData) => {
       if (err) {
         // on fail, retry fast
